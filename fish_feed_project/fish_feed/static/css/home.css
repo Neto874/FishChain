@@ -1,0 +1,41 @@
+body{
+    font-family: Arial, Helvetica, sans-serif;
+}
+nav{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: none;
+    margin-right: 10px;
+    margin-left: 5px;
+}
+
+.logo-img{
+    margin-top: -20px;
+}
+
+.nav-center{
+    margin-top: 10px;
+}
+
+.nav-right{
+    margin-top: 10px;
+}
+
+.myorders-btn, .logout-btn{
+    border: none;
+    cursor: pointer;
+    color: rgba(166, 133, 127, 1);
+}
+
+.carousel-item img {
+  height: 500px;
+  object-fit: cover;
+}
+.carousel-item {
+  transition: transform 0.8s ease-in-out;
+}
+
+.main-content{
+    display: flex;
+}
+

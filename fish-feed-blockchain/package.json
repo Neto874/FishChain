@@ -1,0 +1,13 @@
+{
+  "name": "fish-feed-blockchain",
+  "version": "1.0.0",
+  "main": "networkNode.js",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "ethers": "^6.16.0",
+    "express": "^4.18.2",
+    "request-promise": "^4.2.6",
+    "sha256": "^0.2.0",
+    "uuid": "^3.4.0"
+  }
+}

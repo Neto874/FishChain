@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🐟 Fish Feed Blockchain Explorer</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+    <style>
+        /* --- BODY --- */
+        body {
+            background: linear-gradient(to right, #e0f7fa, #ffffff);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 30px;
+            font-weight: 700;
+            color: #00796b;
+        }
+
+        .container {
+            margin-top: 40px;
+            margin-bottom: 60px;
+        }
+
+        /* --- SECTIONS --- */
+        .section {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            transition: transform 0.2s;
+        }
+
+        .section:hover {
+            transform: translateY(-3px);
+        }
+
+        h3 {
+            color: #00796b;
+            margin-bottom: 20px;
+        }
+
+        /* --- FORM --- */
+        input.form-control, select.form-control {
+            border-radius: 10px;
+        }
+
+        button.btn {
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        /* --- TABLE --- */
+        table.table {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        table.table th {
+            background-color: #00796b;
+            color: white;
+        }
+
+        table.table tr:hover {
+            background-color: #e0f2f1;
+        }
+
+        /* --- MESSAGES --- */
+        #transactionMessage, #mineMessage, #searchMessage {
+            font-weight: 600;
+            margin-top: 10px;
+            color: #00796b;
+        }
+
+        .no-data {
+            color: #d32f2f;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>🐟 Fish Feed Blockchain Explorer</h1>
+
+    <!-- Transaction Form -->
+    <div class="section">
+        <h3>Create Transaction</h3>
+        <form id="transactionForm">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <input type="text" id="sender" class="form-control" placeholder="Sender" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <input type="text" id="recipient" class="form-control" placeholder="Recipient" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <input type="number" id="amount" class="form-control" placeholder="Amount (kg)" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <input type="text" id="feedType" class="form-control" placeholder="Feed Type">
+                </div>
+                <div class="form-group col-md-4">
+                    <input type="text" id="batchNumber" class="form-control" placeholder="Batch Number">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <input type="text" id="location" class="form-control" placeholder="Location">
+                </div>
+                <div class="form-group col-md-6">
+                    <input type="text" id="notes" class="form-control" placeholder="Notes">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Create & Broadcast Transaction</button>
+        </form>
+        <p id="transactionMessage"></p>
+
+        <h4 class="mt-4">Pending Transactions</h4>
+        <div class="table-responsive">
+            <table class="table table-striped" id="pendingTransactionsTable">
+                <thead>
+                    <tr>
+                        <th>Sender</th>
+                        <th>Recipient</th>
+                        <th>Amount</th>
+                        <th>Feed Type</th>
+                        <th>Batch</th>
+                        <th>Location</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Mine Block -->
+    <div class="section">
+        <h3>Mine New Block</h3>
+        <button id="mineBtn" class="btn btn-success btn-block">Mine Block</button>
+        <p id="mineMessage"></p>
+    </div>
+
+    <!-- Search -->
+    <div class="section">
+        <h3>Search Blockchain</h3>
+        <div class="form-row mb-2">
+            <div class="col-md-4">
+                <select id="searchType" class="form-control">
+                    <option value="block">Block Hash</option>
+                    <option value="transaction">Transaction ID</option>
+                    <option value="address">Address</option>
+                </select>
+            </div>
+            <div class="col-md-8">
+                <input type="text" id="searchValue" class="form-control" placeholder="Enter value">
+            </div>
+        </div>
+        <button id="searchBtn" class="btn btn-info btn-block">Search</button>
+        <p id="searchMessage" class="no-data"></p>
+        <div id="searchResult" class="mt-3"></div>
+    </div>
+
+</div>
+
+<script>
+    // --- UTILITY: Load Pending Transactions ---
+    function loadPendingTransactions() {
+        fetch('/blockchain')
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector('#pendingTransactionsTable tbody');
+            tbody.innerHTML = '';
+            data.pendingTransactions.forEach(tx => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${tx.sender}</td>
+                    <td>${tx.recipient}</td>
+                    <td>${tx.amount}</td>
+                    <td>${tx.feedType || ''}</td>
+                    <td>${tx.batchNumber || ''}</td>
+                    <td>${tx.location || ''}</td>
+                    <td>${tx.notes || ''}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        });
+    }
+
+    // --- TRANSACTION ---
+    const transactionForm = document.getElementById('transactionForm');
+    const transactionMessage = document.getElementById('transactionMessage');
+
+    transactionForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const transaction = {
+            sender: document.getElementById('sender').value,
+            recipient: document.getElementById('recipient').value,
+            amount: parseFloat(document.getElementById('amount').value),
+            feedType: document.getElementById('feedType').value,
+            batchNumber: document.getElementById('batchNumber').value,
+            location: document.getElementById('location').value,
+            notes: document.getElementById('notes').value
+        };
+        fetch('/transaction/broadcast', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(transaction)
+        })
+        .then(res => res.json())
+        .then(data => {
+            transactionMessage.innerText = data.note;
+            transactionForm.reset();
+            loadPendingTransactions();
+        });
+    });
+
+    // --- MINE BLOCK ---
+    const mineBtn = document.getElementById('mineBtn');
+    const mineMessage = document.getElementById('mineMessage');
+
+    mineBtn.addEventListener('click', () => {
+        fetch('/mine')
+        .then(res => res.json())
+        .then(data => {
+            mineMessage.innerText = data.note + ' (Block Index: ' + data.block.index + ')';
+            loadPendingTransactions();
+        });
+    });
+
+    // --- SEARCH ---
+    const searchBtn = document.getElementById('searchBtn');
+    const searchMessage = document.getElementById('searchMessage');
+    const searchResult = document.getElementById('searchResult');
+
+    searchBtn.addEventListener('click', () => {
+        const type = document.getElementById('searchType').value;
+        const value = document.getElementById('searchValue').value;
+
+        searchMessage.innerText = '';
+        searchResult.innerHTML = '';
+
+        fetch(`/${type}/${value}`)
+        .then(res => res.json())
+        .then(data => {
+            let html = '';
+            if (type === 'block' && data.block) {
+                const b = data.block;
+                html += `<h4>Block</h4>
+                <table class="table table-striped">
+                    <tr><td>Hash</td><td>${b.hash}</td></tr>
+                    <tr><td>Index</td><td>${b.index}</td></tr>
+                    <tr><td>Timestamp</td><td>${new Date(b.timestamp)}</td></tr>
+                    <tr><td>Nonce</td><td>${b.nonce}</td></tr>
+                    <tr><td>Previous Hash</td><td>${b.previousBlockHash}</td></tr>
+                    <tr><td>Transactions</td><td>${b.transactions.length}</td></tr>
+                </table>`;
+            } else if (type === 'transaction' && data.transaction) {
+                const t = data.transaction;
+                html += `<h4>Transaction</h4>
+                <table class="table table-striped">
+                    <tr><td>Sender</td><td>${t.sender}</td></tr>
+                    <tr><td>Recipient</td><td>${t.recipient}</td></tr>
+                    <tr><td>Amount</td><td>${t.amount} kg</td></tr>
+                    <tr><td>Feed Type</td><td>${t.feedType || ''}</td></tr>
+                    <tr><td>Batch Number</td><td>${t.batchNumber || ''}</td></tr>
+                    <tr><td>Location</td><td>${t.location || ''}</td></tr>
+                    <tr><td>Notes</td><td>${t.notes || ''}</td></tr>
+                    <tr><td>Transaction ID</td><td>${t.transactionId}</td></tr>
+                </table>`;
+            } else if (type === 'address' && data.addressData) {
+                const addr = data.addressData;
+                html += `<h4>Address: Balance ${addr.addressBalance} kg</h4>
+                <table class="table table-striped">
+                    <thead><tr><th>Sender</th><th>Recipient</th><th>Amount</th><th>Feed Type</th><th>Batch</th><th>Location</th><th>Notes</th></tr></thead>
+                    <tbody>`;
+                addr.addressTransactions.forEach(tx => {
+                    html += `<tr>
+                        <td>${tx.sender}</td>
+                        <td>${tx.recipient}</td>
+                        <td>${tx.amount}</td>
+                        <td>${tx.feedType || ''}</td>
+                        <td>${tx.batchNumber || ''}</td>
+                        <td>${tx.location || ''}</td>
+                        <td>${tx.notes || ''}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+            } else {
+                searchMessage.innerText = 'No data found.';
+            }
+            searchResult.innerHTML = html;
+        });
+    });
+
+    // --- INITIAL LOAD ---
+    loadPendingTransactions();
+</script>
+
+</body>
+</html>

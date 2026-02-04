@@ -1,0 +1,70 @@
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0px;
+    padding: 0px;
+}
+
+input, select{
+    padding-right: 300px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+    border: none;
+    /* height: 60px;
+    width: 623px; */
+    background-color: rgba(217, 217, 217, 1);
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+input::placeholder{
+    font-size: 15px;
+}
+
+.submit-form-btn{
+    background-color: rgba(166, 133, 127, 1);
+    color: white;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border: none;
+    border-radius: 2px;
+    margin-left: 67%;
+    cursor: pointer;
+}
+
+.switch{
+    color: rgba(166, 133, 127, 1);
+}
+
+.parent-container{
+    display: flex;
+    
+}
+
+.left-card{
+    width: 35%;
+    margin-right: 30px;
+    height: 100vh;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: left center;
+    position: relative;
+}
+
+.right-signup-card{
+    margin-top: 30px;
+}
+
+.logo-container{
+    display: inline-block;
+    position: absolute;
+}
+
+.socials-container{
+    display: inline-block;
+    position: absolute;
+    left: 67%;
+    top: 30px;
+    cursor: pointer;
+}
