@@ -17,6 +17,7 @@
 
   </head>
   <body>
+
     <nav>
       <div class="nav-left">
         <img
@@ -41,6 +42,16 @@
         >
       </div>
     </nav>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
     <hr style="margin-top: -20px" />
 
     <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">

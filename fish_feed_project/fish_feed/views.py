@@ -26,6 +26,7 @@ def product_detail(request, product_id):
         delivery_location = request.POST.get("delivery_location")
         order = Order(farmer = request.user, product = product, quantity = quantity, delivery_location = delivery_location, status = "pending")
         order.save()
+        messages.success(request,"Order has been placed successfully")
         return redirect ("fish_feed:home")
     return render (request,"productDetail.html", context={"product": product})
     
@@ -73,6 +74,7 @@ def add_product(request):
 
         new_product = Product(distributor = distributor, product_name = product_name, product_description = product_description, feed_type = feed_type, price = price, exp_date = exp_date, quantity_available = quantity_available, product_thumbnail=product_thumbnail)
         new_product.save()
+        messages.success(request,"Product has been successfully added")
         return redirect("fish_feed:distributor_dashboard")
     return render (request, "addProduct.html")
 
@@ -80,6 +82,7 @@ def add_product(request):
 def delete_product(request, product_id):
     product = Product.objects.get(pk = product_id)
     product.delete()
+    messages.success(request, "Product has been deleted")
     return redirect ("fish_feed:distributor_dashboard")
 
 @login_required
@@ -94,6 +97,7 @@ def edit_product(request, product_id):
         product.quantity_available = request.POST.get("quantity_available")
         product.product_thumbnail = request.FILES.get("product_thumbnail")
         product.save()
+        messages.success(request,"Product has been successfully edited")
         return redirect ("fish_feed:distributor_dashboard")
     return render(request, "editProduct.html", context={"product": product})
 
@@ -128,11 +132,13 @@ def accept_order(request, order_id):
         mine_res = requests.get(mine_url, timeout=5)
         mine_res.raise_for_status()
 
+        messages.success(request, "Order has been successfully broadcasted and mined")
+
     except requests.exceptions.RequestException as e:
 
         accepted_order.status = "pending"
         accepted_order.save()
-
+        messages.error(request, "An Error occured please try again")
 
         print("Blockchain API error:", e)
 
