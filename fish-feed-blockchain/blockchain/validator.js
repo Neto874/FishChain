@@ -1,17 +1,19 @@
-// blockchain/validator.js
-
-/**
- * Example validation rules for an order:
- * - Quantity must be > 0
- * - Price must be > 0
- * - Feed type must be non-empty
- */
-
 function validateOrder(orderData) {
-  const { quantity, price, feed_type } = orderData;
+  const { quantity, price, feed_type, quantity_available, exp_date, delivery_location } = orderData;
 
   if (!quantity || quantity <= 0) {
     return { isValid: false, message: "Quantity must be greater than 0" };
+  }
+
+  if (!quantity_available || quantity_available < quantity) {
+    return { isValid: false, message: "You donot have enough product to accept this order" };
+  }
+
+  if (quantity > 1000) { 
+    return { isValid: false, message: "Quantity exceeds the maximum allowed per order" };
+  }
+  if (!exp_date) { 
+    return { isValid: false, message: "You can only order products that have a valid expiry date" };
   }
 
   if (!price || price <= 0) {
@@ -22,7 +24,12 @@ function validateOrder(orderData) {
     return { isValid: false, message: "Feed type must be provided" };
   }
 
-  // Passed all checks
+  if (!delivery_location || delivery_location.trim() === "") {
+    return { isValid: false, message: "Delivery location must be provided" };
+  }
+
+
+  
   return { isValid: true, message: "Order is valid" };
 }
 

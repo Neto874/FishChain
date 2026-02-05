@@ -1,37 +1,118 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ product.product_name }} | Fish Feed</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ product.product_name }} | Fish Feed</title>
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<div class="container mt-5">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
-  <h1 class="mb-4">{{ product.product_name }}</h1>
-  <p>{{ product.product_description|default:"No description available." }}</p>
-  <p>price per bag: {{product.price}}</p>
-  <p>Quantity Available: {{product.quantity_available}} bags</p>
+    <style>
+      .main-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 40px;
+      }
+    </style>
+  </head>
 
-  <form action="" method="post" class="w-50">
-    {% csrf_token %}
-    <div class="mb-3">
-      <label for="quantity" class="form-label">Quantity</label>
-      <input type="number" class="form-control" name="quantity" required>
-    </div>
+  <body>
+    <section class="main-container p-4">
+      <div class="product-image-container">
+        <img
+          src="{{ product.product_thumbnail.url }}"
+          alt="{{ product.product_name }}"
+          height="600"
+          width="400"
+        />
+      </div>
 
-    <div class="mb-3">
-      <label for="delivery_location" class="form-label">Delivery Location</label>
-      <input type="text" class="form-control" name="delivery_location" required>
-    </div>
+      <div class="container mt-5">
+        <h1 class="mb-4">{{ product.product_name }}</h1>
 
-    <button type="submit" class="btn btn-success"><i class="bi bi-cart-plus"></i> Place Order</button>
-    <a href="{% url 'fish_feed:home' %}" class="btn btn-secondary">⬅ Back</a>
-  </form>
+        <p>
+          {{ product.product_description|default:"No description available." }}
+        </p>
 
-</div>
-</body>
+        <p><strong>Price per bag:</strong> ₦{{ product.price }}</p>
+        <p>
+          <strong>Quantity Available:</strong>
+          {{ product.quantity_available }} bags
+        </p>
+
+        <form action="" method="post" class="w-50">
+          {% csrf_token %}
+
+       
+          <div class="mb-3">
+            <label class="form-label">Quantity</label>
+
+            <div class="input-group">
+              <input
+                type="number"
+                class="form-control"
+                id="quantityInput"
+                name="quantity"
+                value="1"
+                min="1"
+                max="{{ product.quantity_available }}"
+                required
+              />
+
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                id="incrementBtn"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <!-- Delivery Location -->
+          <div class="mb-3">
+            <label class="form-label">Delivery Location</label>
+            <input
+              type="text"
+              class="form-control"
+              name="delivery_location"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn btn-success">
+            Place Order
+          </button>
+
+          <a href="{% url 'fish_feed:home' %}" class="btn btn-secondary ms-2">
+            Back
+          </a>
+        </form>
+      </div>
+    </section>
+
+    <footer style="margin-top: 30px;">
+      <center>
+        2026 copyright
+      </center>
+    </footer>
+
+    
+    <script>
+      const quantityInput = document.getElementById("quantityInput");
+      const incrementBtn = document.getElementById("incrementBtn");
+
+      incrementBtn.addEventListener("click", () => {
+        const currentValue = parseInt(quantityInput.value) || 0;
+        const maxValue = parseInt(quantityInput.max);
+
+        if (currentValue < maxValue) {
+          quantityInput.value = currentValue + 1;
+        }
+      });
+    </script>
+  </body>
 </html>

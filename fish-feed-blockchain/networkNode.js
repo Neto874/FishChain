@@ -6,7 +6,7 @@ const uuid = require('uuid');
 
 const app = express();
 const port = process.argv[2];
-const nodeAddress = uuid.v1().split('-').join('');
+// const nodeAddress = uuid.v1().split('-').join('');
 
 const { validateOrder } = require("./blockchain/validator");
 
@@ -17,13 +17,13 @@ fishFeedChain.currentNodeUrl = `http://localhost:${port}`;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-/* -------- BLOCKCHAIN ---------- */
+
 
 app.get('/blockchain', function (req, res) {
     res.send(fishFeedChain);
 });
 
-/* -------- TRANSACTIONS ---------- */
+
 
 app.post('/transaction', function (req, res) {
     const blockIndex =
@@ -44,13 +44,14 @@ app.post("/transaction/broadcast", async (req, res) => {
       price,
       feed_type,
       exp_date,
-      order_status,
+    //   order_status,
       delivery_location,
-      product_name
+      product_name,
+      quantity_available
     } = req.body;
 
-    // 1. JS validation instead of Solidity
-    const validation = validateOrder({ quantity, price, feed_type });
+    
+    const validation = validateOrder({ quantity, price, feed_type,quantity_available,exp_date,delivery_location });
 
     if (!validation.isValid) {
       return res.status(400).json({
@@ -67,14 +68,15 @@ app.post("/transaction/broadcast", async (req, res) => {
       price,
       feed_type,
       exp_date,
-      order_status,
+    //   order_status,
       delivery_location,
-      product_name
+      product_name,
+      quantity_available
     );
 
     fishFeedChain.addTransactionToPendingTransactions(newTransaction);
 
-    // 3. Broadcast to other nodes
+    
     const requestPromises = [];
     fishFeedChain.networkNodes.forEach(networkNodeUrl => {
       requestPromises.push(
@@ -96,7 +98,7 @@ app.post("/transaction/broadcast", async (req, res) => {
   }
 });
 
-/* -------- MINING ---------- */
+
 
 app.get('/mine', function (req, res) {
     const lastBlock = fishFeedChain.getLastBlock();
@@ -158,10 +160,7 @@ app.post('/receive-new-block', function (req, res) {
     }
 });
 
-/* -------- VERIFY ORDER ---------- */
-/**
- * Verify a Django Order by order_id
- */
+
 app.get('/verify-order/:orderId', function (req, res) {
     const orderId = req.params.orderId;
 
@@ -197,7 +196,7 @@ app.get('/verify-order/:orderId', function (req, res) {
     });
 });
 
-/* -------- BLOCK EXPLORER ---------- */
+
 
 app.get('/block/:blockHash', (req, res) => {
     res.json({ block: fishFeedChain.getBlock(req.params.blockHash) });

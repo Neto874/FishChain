@@ -1,8 +1,9 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User, Group
+from django.shortcuts import render, redirect, get_object_or_404
+# from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
 from .models import Product, Order
 import requests
+from django.contrib import messages
 broadcast_url = "http://localhost:3001/transaction/broadcast"
 mine_url = "http://localhost:3001/mine"
 
@@ -98,24 +99,27 @@ def edit_product(request, product_id):
 
 
 
-@login_required
 def accept_order(request, order_id):
     accepted_order = Order.objects.get(pk=order_id)
     accepted_order.status = "accepted"
+    product = Product.objects.get(pk = accepted_order.product.id)
+    product.quantity_available = product.quantity_available - accepted_order.quantity
+    product.save()
     accepted_order.save()
-    if accepted_order.quantity <= accepted_order.product.quantity_available:
-        data = {
-            "order_id":accepted_order.id,
-            "distributor": accepted_order.product.distributor.username,
-            "farmer": accepted_order.farmer.username,
-            "quantity": accepted_order.quantity,
-            "price": float(accepted_order.product.price),
-            "feed_type": accepted_order.product.feed_type,
-            "exp_date": str(accepted_order.product.exp_date),
-            "order_status": "success",
-            "delivery_location": accepted_order.delivery_location,
-            "product_name": accepted_order.product.product_name
-        }
+
+    data = {
+        "order_id":accepted_order.id,
+        "distributor": accepted_order.product.distributor.username,
+        "farmer": accepted_order.farmer.username,
+        "quantity": accepted_order.quantity,
+        "price": float(accepted_order.product.price),
+        "feed_type": accepted_order.product.feed_type,
+        "exp_date": str(accepted_order.product.exp_date),
+        # "order_status": "success",
+        "delivery_location": accepted_order.delivery_location,
+        "product_name": accepted_order.product.product_name,
+        "quantity_available": accepted_order.product.quantity_available,
+    }
 
     try:
         tx_res = requests.post(broadcast_url, json=data, timeout=5)
@@ -134,6 +138,7 @@ def accept_order(request, order_id):
 
 
     return redirect("fish_feed:distributor_dashboard")
+
 
 
 @login_required
