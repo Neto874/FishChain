@@ -70,7 +70,6 @@ class Blockchain {
         }
         return nonce;
     }
-    /* --------- BLOCK EXPLORER METHODS ---------- */
     getBlock(blockHash) {
         let correctBlock = null;
         this.chain.forEach(block => {

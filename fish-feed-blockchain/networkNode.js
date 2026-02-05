@@ -6,7 +6,6 @@ const uuid = require('uuid');
 
 const app = express();
 const port = process.argv[2];
-// const nodeAddress = uuid.v1().split('-').join('');
 
 const { validateOrder } = require("./blockchain/validator");
 
@@ -31,9 +30,7 @@ app.post('/transaction', function (req, res) {
     res.json({ note: `Transaction will be added in block ${blockIndex}.` });
 });
 
-/**
- * Broadcast a new ORDER transaction
- */
+
 app.post("/transaction/broadcast", async (req, res) => {
   try {
     const {
@@ -59,7 +56,7 @@ app.post("/transaction/broadcast", async (req, res) => {
       });
     }
 
-    // 2. JS blockchain logic (unchanged)
+
     const newTransaction = fishFeedChain.createNewTransaction(
       order_id,
       distributor,
